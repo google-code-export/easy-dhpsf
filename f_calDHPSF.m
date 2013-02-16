@@ -102,9 +102,6 @@ else
 end
 clear darkFileInfo;
 
-
-
-
 %% Pick region of interest for analysis
 
 % Plots the avg image .tif
@@ -156,13 +153,6 @@ hold off;
 
 % moleLocs = round(ginput);
 numBeads = size(moleLocs,1);
-
-% % draw the bead numbers onto the figure
-% % TEXT(X,Y,'string') adds the text in the quotes to location (X,Y)
-% hold on;
-% for a = 1:numBeads
-%     text(moleLocs(a,1),moleLocs(a,2),num2str(a),'color','white','fontsize',13,'fontweight','bold');
-% end
     
 saveas(hLocs,[outputFilePrefix 'bead map.png']);
 close(hLocs);
@@ -173,8 +163,6 @@ close(hLocs);
 % [frameNum moleNum amp1 amp2 xMean1 yMean1 xMean2 yMean2 sigma1 sigma2 
 %  bkgndMean totalFitError goodFit xCenter yCenter angle numPhotons CFocusPosition]
 PSFfits = zeros(numFiles,numFrames*numBeads, 21);
-%bkgndFile = [bkgndFilePrefix 'bkgnd_'];
-bkgndFits = zeros(numFiles,numFrames,8);
 phasemask_position = zeros(numFiles,1);
 startTime = tic;
 
@@ -375,7 +363,8 @@ for a=1:size(sifLogData,1)-2
         % (3) All sigmas need to be > sigmaBound(1) and < sigmaBound(2)
         % (4) Distance between lobes needs to be > lobeDist(1) pixels and < lobeDist(2) pixels
         % (5) Make sure amplitudes are within 100% of one another
-        % (6) Make sure totalFitError/(total number of photons) < 1.05
+        % (6) Make sure totalFitError/(total number of photons) < 1.05 (not
+        %     enabled at the present time)
         if exitflag > 0
             if fitParam(1)<0 || fitParam(2)<0 
                 PSFfits(n,rowIdx,13) = -1001;   %% this flag will never show up because it is equivalent to extiflag -2 in lsqnonlin
@@ -446,206 +435,209 @@ save([outputFilePrefix 'raw fits.mat']);
 
 end
 
-% not sure why data is saved, then reloaded again...
-save([outputFilePrefix 'raw fits.mat'])
+%% Measure distances between beads / diagnose phase mask misalignment
 
-%% Measure distances between beads
+% This block of code is used to optimize the phase mask position along the
+% direction of propagation of the beam. Multiple calibrations using
+% multiple beads in the FoV should be taken at various positions. The
+% position that minimizes intermolecular xy drift over the course of a scan
+% is taken to be the best.
 
-if numBeads > 1
-%     load([outputFilePrefix 'raw fits.mat'])
-
-    interMoleDistance = zeros(numFiles, numFrames, numBeads, numBeads);
-    angle = zeros(numFiles, numFrames, numBeads);
-
-    % TO Do: is it possible to vectorize to get rid of these loops
-
-
-    for n = 1:numFiles
-        for a=1:size(sifLogData,1)-2
-    %     for a=1:numFrames
-            for i = 1:numBeads
-
-                x1 = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==i,14);
-                y1 = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==i,15);
-                angle(n,a,i) = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==i,16);
-
-                for j = i+1:numBeads
-                    if PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==i,13) > 0 ...
-                    && PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==j,13) > 0
-
-                        x2 = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==j,14);
-                        y2 = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==j,15);
-                        interMoleDistance(n,a,i,j) = sqrt((y2-y1)^2 + (x2-x1)^2);
-
-                    else
-                        interMoleDistance(n,a,i,j) = nan;  
-                    end
-                    index = [n a i j];    
-                end
-            end
-        end
-    end
-
+% if numBeads > 1
+% %     load([outputFilePrefix 'raw fits.mat'])
+% 
+%     interMoleDistance = zeros(numFiles, numFrames, numBeads, numBeads);
+%     angle = zeros(numFiles, numFrames, numBeads);
+% 
+%     % TO Do: is it possible to vectorize to get rid of these loops
+% 
+% 
+%     for n = 1:numFiles
+%         for a=1:size(sifLogData,1)-2
+%     %     for a=1:numFrames
+%             for i = 1:numBeads
+% 
+%                 x1 = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==i,14);
+%                 y1 = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==i,15);
+%                 angle(n,a,i) = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==i,16);
+% 
+%                 for j = i+1:numBeads
+%                     if PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==i,13) > 0 ...
+%                     && PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==j,13) > 0
+% 
+%                         x2 = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==j,14);
+%                         y2 = PSFfits(n,PSFfits(n,:,1)==a & PSFfits(n,:,2)==j,15);
+%                         interMoleDistance(n,a,i,j) = sqrt((y2-y1)^2 + (x2-x1)^2);
+% 
+%                     else
+%                         interMoleDistance(n,a,i,j) = nan;  
+%                     end
+%                     index = [n a i j];    
+%                 end
+%             end
+%         end
+%     end
+% 
+% %     save([outputFilePrefix 'raw fits.mat']);
+%     %% Average all frames in a step
+% 
+% %     load([outputFilePrefix 'raw fits.mat'])
+%     meanInterMoleDistance = zeros(numFiles, numSteps, numBeads, numBeads);
+%     meanAngle = zeros(numFiles, numSteps, numBeads);
+% 
+%     for step = 1:numSteps
+%     % for step = 2:21
+%         for n = 1:numFiles
+%             for i = 1:numBeads
+% 
+%                 meanAngle(n,step,i) = nanmean(angle(n,startFrame(n,step):endFrame(n,step),i));
+% 
+%                 for j = i+1:numBeads
+% 
+%                     meanInterMoleDistance(n,step,i,j) = nanmean(interMoleDistance(n,startFrame(n,step):endFrame(n,step),i,j));
+% 
+%                 end
+%             end
+%         end
+%     end
+% 
+%     if numBeads > 1
+%     %     scatter(2:21, meanInterMoleDistance(1,2:21,1,3)/1000)
+%         h=figure;
+%         scatter(1:numSteps, meanInterMoleDistance(numFiles,1:numSteps,1,2)/1000)
+%         xlabel('Defocus Step');
+%         ylabel('Intermolecular Distance (micrometers)');
+%         close(h);
+%     end
+% 
+%     if numFiles == 1
+%         xyError = zeros (numBeads-1,numBeads);
+%         for i = 1:numBeads
+%             for j = i+1:numBeads
+% 
+%                 xyError(i,j) = max(meanInterMoleDistance(numFiles,1:numSteps,i,j))-...
+%                     min(meanInterMoleDistance(numFiles,1:numSteps,i,j));
+%                 meanDist(i,j) = nanmean(squeeze(meanInterMoleDistance(numFiles,1:numSteps,i,j))); 
+%             end
+%         end
+% 
+%         xyError_rel = (xyError./meanDist)*100;
+% 
+%         h=figure;
+%         hist(xyError(xyError~=0))
+%         xlabel('Absolute XY Error (nm)');
+%         ylabel('Frequency');
+%         close(h);
+%         h=figure;
+%         hist(xyError_rel(xyError_rel~=0))
+%         xlabel('Relative XY Error (%)');
+%         ylabel('Frequency');
+%         close(h);
+%     end
+% 
+% %     save([outputFilePrefix 'raw fits.mat']);
+% 
+%     %%
+%     if numFiles >1
+%     %% Evaluate the magnitude of the distance changes (slope)
+%     
+%     % numMoles = 12;
+%     % numMoles = numMoles -6;
+%     slope = zeros(numFiles,numBeads,numBeads);
+%     stepRange = 2:40;
+%     % stepRange = 1:numSteps;
+%     R = zeros(numFiles, numBeads,numBeads);
+% 
+%     for n = 1:numFiles
+%         for i = 1:numBeads
+%             for j = i+1:numBeads
+%                 includedSteps = ~isnan(squeeze(squeeze(meanInterMoleDistance(n,stepRange,i,j))));
+%                 [p] = polyfit(stepRange(includedSteps),meanInterMoleDistance(n,stepRange(includedSteps),i,j), 1);
+%                 corr = corrcoef(meanInterMoleDistance(n,stepRange(includedSteps),i,j),...
+%                     p(1)*stepRange(includedSteps)+p(2));
+%                 R(n,i,j) = corr(1,2);
+%                 % The slope calculation is less reliable for phase mask positions close to the optimum, 
+%                 %where the slope should be zero.  However this filter does not
+%                 %affect the final answer
+%                 if corr(1,2) > 0.95        
+%                     slope(n,i,j) = p(1);
+%                 else 
+%                     slope(n,i,j) = nan;
+%                 end
+%                 [n i j]
+%             end
+%         end;
+%     end;
+%     clear corr includedSteps
+% 
+%     % phasemask_position
+%     for i = 1:numBeads
+%         for j = i+1:numBeads
+%             scatter(phasemask_position, slope(:,i,j))
+%             drawnow
+%     %        pause(0.5);
+%         end
+%     end
+% 
+%     figure
+%     scatter(phasemask_position, slope(:,1,3))
+%         axis tight;
+%         xlabel('Phasemask Position (mm)');
+%         ylabel('Slope');
+% 
+%     %% Calculate the Phase Mask position, where the slope is zero
+%     
+%     optimumPhaseMaskPos = zeros(numBeads,numBeads);
+%     R1 = zeros(numBeads,numBeads);
+%     range = 1:length(phasemask_position);
+%     for i = 1:numBeads
+%         for j = i+1:numBeads
+%                 includedSteps = ~isnan(squeeze(squeeze(slope(range,i,j))));
+% 
+%                 if sum(includedSteps) >= 4
+% 
+%                     p = polyfit(phasemask_position(includedSteps),slope(range(includedSteps),i,j), 1);
+%                     corr = corrcoef(slope(range(includedSteps),i,j),...
+%                         p(1)*phasemask_position(includedSteps)+p(2));
+%                     R1(i,j) = corr(1,2);
+%                     if corr(1,2) >= 0.90  % 0.998
+%                         optimumPhaseMaskPos(i,j) = -p(2)/p(1);
+%                     else
+%                         optimumPhaseMaskPos(i,j) = nan;
+%                     end
+% 
+%                 else
+%                     optimumPhaseMaskPos(i,j) = nan;
+%                 end
+% 
+%         end
+%     end
+% 
+%     hist(optimumPhaseMaskPos(optimumPhaseMaskPos~=0))
+% 
+%     xlabel('Optimal Phasemask Position (mm)');
+%     ylabel('Frequency');
+%     optimumPhaseMaskPos_avg = nanmean((optimumPhaseMaskPos(optimumPhaseMaskPos~=0)))
+%     optimumPhaseMaskPos_std = nanstd((optimumPhaseMaskPos(optimumPhaseMaskPos~=0)))
+%     %min(min(R1(R1~=0)))
+% 
+%     % beadRange = [1 2 3 4 5 8 9 10];
+%     % optimumPhaseMaskPos_filtered = optimumPhaseMaskPos(beadRange,beadRange);
+%     % hist(optimumPhaseMaskPos_filtered(optimumPhaseMaskPos_filtered~=0))
+%     % optimumPhaseMaskPos_filtered(optimumPhaseMaskPos_filtered==0)=nan;
+%     % optimumPhaseMaskPos_filtered_avg = nanmean(nanmean((optimumPhaseMaskPos_filtered)))
+%     % 
+%     % 
 %     save([outputFilePrefix 'raw fits.mat']);
-    %% Average all frames in a step
-
-%     load([outputFilePrefix 'raw fits.mat'])
-    meanInterMoleDistance = zeros(numFiles, numSteps, numBeads, numBeads);
-    meanAngle = zeros(numFiles, numSteps, numBeads);
-
-    for step = 1:numSteps
-    % for step = 2:21
-        for n = 1:numFiles
-            for i = 1:numBeads
-
-                meanAngle(n,step,i) = nanmean(angle(n,startFrame(n,step):endFrame(n,step),i));
-
-                for j = i+1:numBeads
-
-                    meanInterMoleDistance(n,step,i,j) = nanmean(interMoleDistance(n,startFrame(n,step):endFrame(n,step),i,j));
-
-                end
-            end
-        end
-    end
-
-    if numBeads > 1
-    %     scatter(2:21, meanInterMoleDistance(1,2:21,1,3)/1000)
-        h=figure;
-        scatter(1:numSteps, meanInterMoleDistance(numFiles,1:numSteps,1,2)/1000)
-        xlabel('Defocus Step');
-        ylabel('Intermolecular Distance (micrometers)');
-        close(h);
-    end
-
-    if numFiles == 1
-        xyError = zeros (numBeads-1,numBeads);
-        for i = 1:numBeads
-            for j = i+1:numBeads
-
-                xyError(i,j) = max(meanInterMoleDistance(numFiles,1:numSteps,i,j))-...
-                    min(meanInterMoleDistance(numFiles,1:numSteps,i,j));
-                meanDist(i,j) = nanmean(squeeze(meanInterMoleDistance(numFiles,1:numSteps,i,j))); 
-            end
-        end
-
-        xyError_rel = (xyError./meanDist)*100;
-
-        h=figure;
-        hist(xyError(xyError~=0))
-        xlabel('Absolute XY Error (nm)');
-        ylabel('Frequency');
-        close(h);
-        h=figure;
-        hist(xyError_rel(xyError_rel~=0))
-        xlabel('Relative XY Error (%)');
-        ylabel('Frequency');
-        close(h);
-    end
-
-%     save([outputFilePrefix 'raw fits.mat']);
-
-    %%
-    if numFiles >1
-    %% Evaluate the magnitude of the distance changes (slope)
-    % numMoles = 12;
-    % numMoles = numMoles -6;
-    slope = zeros(numFiles,numBeads,numBeads);
-    stepRange = 2:40;
-    % stepRange = 1:numSteps;
-    R = zeros(numFiles, numBeads,numBeads);
-
-    for n = 1:numFiles
-        for i = 1:numBeads
-            for j = i+1:numBeads
-                includedSteps = ~isnan(squeeze(squeeze(meanInterMoleDistance(n,stepRange,i,j))));
-                [p] = polyfit(stepRange(includedSteps),meanInterMoleDistance(n,stepRange(includedSteps),i,j), 1);
-                corr = corrcoef(meanInterMoleDistance(n,stepRange(includedSteps),i,j),...
-                    p(1)*stepRange(includedSteps)+p(2));
-                R(n,i,j) = corr(1,2);
-                % The slope calculation is less reliable for phase mask positions close to the optimum, 
-                %where the slope should be zero.  However this filter does not
-                %affect the final answer
-                if corr(1,2) > 0.95        
-                    slope(n,i,j) = p(1);
-                else 
-                    slope(n,i,j) = nan;
-                end
-                [n i j]
-            end
-        end;
-    end;
-    clear corr includedSteps
-
-    % phasemask_position
-    for i = 1:numBeads
-        for j = i+1:numBeads
-            scatter(phasemask_position, slope(:,i,j))
-            drawnow
-    %        pause(0.5);
-        end
-    end
-
-    figure
-    scatter(phasemask_position, slope(:,1,3))
-        axis tight;
-        xlabel('Phasemask Position (mm)');
-        ylabel('Slope');
-
-    % save('raw fits.mat');
+% 
+%     end
+% 
+% end
 
 
-    %% Calculate the Phase Mask position, where the slope is zero
-
-    optimumPhaseMaskPos = zeros(numBeads,numBeads);
-    R1 = zeros(numBeads,numBeads);
-    range = 1:length(phasemask_position);
-    for i = 1:numBeads
-        for j = i+1:numBeads
-                includedSteps = ~isnan(squeeze(squeeze(slope(range,i,j))));
-
-                if sum(includedSteps) >= 4
-
-                    p = polyfit(phasemask_position(includedSteps),slope(range(includedSteps),i,j), 1);
-                    corr = corrcoef(slope(range(includedSteps),i,j),...
-                        p(1)*phasemask_position(includedSteps)+p(2));
-                    R1(i,j) = corr(1,2);
-                    if corr(1,2) >= 0.90  % 0.998
-                        optimumPhaseMaskPos(i,j) = -p(2)/p(1);
-                    else
-                        optimumPhaseMaskPos(i,j) = nan;
-                    end
-
-                else
-                    optimumPhaseMaskPos(i,j) = nan;
-                end
-
-        end
-    end
-
-    hist(optimumPhaseMaskPos(optimumPhaseMaskPos~=0))
-
-    xlabel('Optimal Phasemask Position (mm)');
-    ylabel('Frequency');
-    optimumPhaseMaskPos_avg = nanmean((optimumPhaseMaskPos(optimumPhaseMaskPos~=0)))
-    optimumPhaseMaskPos_std = nanstd((optimumPhaseMaskPos(optimumPhaseMaskPos~=0)))
-    %min(min(R1(R1~=0)))
-
-    % beadRange = [1 2 3 4 5 8 9 10];
-    % optimumPhaseMaskPos_filtered = optimumPhaseMaskPos(beadRange,beadRange);
-    % hist(optimumPhaseMaskPos_filtered(optimumPhaseMaskPos_filtered~=0))
-    % optimumPhaseMaskPos_filtered(optimumPhaseMaskPos_filtered==0)=nan;
-    % optimumPhaseMaskPos_filtered_avg = nanmean(nanmean((optimumPhaseMaskPos_filtered)))
-    % 
-    % 
-    save([outputFilePrefix 'raw fits.mat']);
-
-    end
-
-end
 %% initialize calibration variables
 
-
+% From the old version, used when only using one file and one bead
 %numSteps = numFrames/numAcqPerStep;
 % meanAngles = zeros(1,numSteps);
 % stddevAngles = zeros(1,numSteps);
