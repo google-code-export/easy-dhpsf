@@ -1,3 +1,30 @@
+% Copyright (c)2013, The Board of Trustees of The Leland Stanford Junior
+% University. All rights reserved.
+% 
+% Redistribution and use in source and binary forms, with or without 
+% modification, are permitted provided that the following conditions are 
+% met:
+% 
+% Redistributions of source code must retain the above copyright notice, 
+% this list of conditions and the following disclaimer.
+% Redistributions in binary form must reproduce the above copyright notice, 
+% this list of conditions and the following disclaimer in the documentation 
+% and/or other materials provided with the distribution.
+% Neither the name of the Leland Stanford Junior University nor the names 
+% of its contributors may be used to endorse or promote products derived 
+% from this software without specific prior written permission.
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS 
+% IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+% THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+% PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+% CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+% EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+% PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+% PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+% LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+% NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+% SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 function easy_dhpsf()
 % easy_dhpsf allows scientific users to extract single-molecule
 % localizations in 3D when using the double-helix point spread function
@@ -59,17 +86,18 @@ s.smacmRawROI = [0 0 0 0];
 % EM gain setting used when acquiring SMACM data
 s.smacmEMGain = 300;
 % photons/count, camera setting, global to all modules
-s.conversionGain = 26.93; %8A % 24.7; % 8B 
+s.conversionGain = 26.93; %8A % 24.7; % 8B
 % imaging system property, global to all modules
 s.nmPerPixel = 125.78; % 8A% 160; %8B
 % channel identifier
 s.channel = '0';
 % [minWidth maxWidth] of the two spots of the DHPSF, units of pixels
+% relative to the original value of 160 nm / pix
 s.sigmaBounds = [1.0 1.5]*160/s.nmPerPixel;
 % [minSpacing maxSpacing] between the two spots of the DHPSF, units of
-% pixels
+% pixels relative to the original value of 160 nm / pix
 s.lobeDistBounds = [3.5 7]*160/s.nmPerPixel;   %[3.5 10]*160/s.nmPerPixel;
-% half-width of box to extract when fitting DHPSF images, units of pixels
+% half-width of box to extract when fitting DHPSF images, units of integer pixels
 s.boxRadius = round(7*160/s.nmPerPixel);
 % smoothing filter width for identifying DHPSF SMs, units of pixels
 s.gaussianFilterSigma = 1.5*160/s.nmPerPixel;
@@ -131,6 +159,7 @@ htextThreshStatus = uicontrol('Parent',hpanelThresh,'Style','text',...
 htextFitStatus = uicontrol('Parent',hpanelFit,'Style','text',...
     'Position',[figSize(1)-120,panelMargin+5,70,15]);
 % setup controls
+% channel selection - see also the popupSetupChannel_Callback function
 % htextSetupChannel = uicontrol('Parent',hpanelSetup,'Style','text',...
 %     'String','Channel:',...
 %     'Position',[panelMargin,panelMargin,60,30],...
