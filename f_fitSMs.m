@@ -117,29 +117,29 @@ for stack = 1:length(dataFile)
         
         % Compute average image
         
-        avgImg = zeros(imgHeight,imgWidth);
-        for a = 1:200
-            avgImg = avgImg + double(imread([dataPath dataFile{stack}],a,'Info',fileInfo)) - darkAvg;
-            %    avgImg = avgImg + double(imread([dataPath dataFile],a)) - darkAvg;
-            %Deleted 'Info' -AC 6/21
-        end
-        avgImg = avgImg/200;
+%         avgImg = zeros(imgHeight,imgWidth);
+%         for a = 1:200
+%             avgImg = avgImg + double(imread([dataPath dataFile{stack}],a,'Info',fileInfo)) - darkAvg;
+%             %    avgImg = avgImg + double(imread([dataPath dataFile],a)) - darkAvg;
+%             %Deleted 'Info' -AC 6/21
+%         end
+%         avgImg = avgImg/200;
         
         % define variables related to the templates
  
         numTemplates = length(templateFrames); 
         templateColors = jet(numTemplates);
         
-        % make sure ROI is an even number of pixels: should be done in
+        % make sure ROI is an even number of pixels: should also be done in
         % f_calSMidentification
-%         if mod(ROI(3),2)==1
-%             ROI(3) = ROI(3)-1;
-%         end
-%         if mod(ROI(4),2)==1
-%             ROI(4) = ROI(4)-1;
-%         end
-%         cropWidth = ROI(3);
-%         cropHeight = ROI(4);
+        if mod(ROI(3),2)==1
+            ROI(3) = ROI(3)-1;
+        end
+        if mod(ROI(4),2)==1
+            ROI(4) = ROI(4)-1;
+        end
+        cropWidth = ROI(3);
+        cropHeight = ROI(4);
 
         %% prepare template for template matching
         

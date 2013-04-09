@@ -42,7 +42,7 @@ if useFidCorrections
     for fileNum=1:length(fidFilePrefix)
 %         fidFiles = [fidFiles; {[fidPath fidFile]}];
         % load data
-        load([fidFilePrefix{fileNum} 'raw fits.mat'],'PSFfits','numFrames');
+        load([fidFilePrefix{fileNum} 'raw fits.mat'],'PSFfits','numFrames','numMoles');
         
         if fileNum == 1
             tempPSFfits = PSFfits(:,1:23);
@@ -157,7 +157,7 @@ if exist('tempAvgDevX','var')
     avgDevY = tempAvgDevY;
     avgDevZ = tempAvgDevZ;
     
-    [avgDevX_denoised,avgDevY_denoised,avgDevZ_denoised] = f_waveletFidTracks(avgDevX,avgDevY,avgDevZ,0);
+    [avgDevX_denoised,avgDevY_denoised,avgDevZ_denoised] = f_waveletFidTracks(avgDevX,avgDevY,avgDevZ,1);
     
     % apply fiduciary corrections
     if useDenoising == 1

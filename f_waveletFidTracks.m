@@ -225,7 +225,7 @@ function [xfid_filt,yfid_filt,zfid_filt] = f_waveletFidTracks(xfid,yfid,zfid,Fas
         %%
         %fast version: enter one set of paramaters for all tracks
 
-        dec = 3; %decomposition level
+        dec = 6; %decomposition level
         basis = 'db3'; %wavelet basis
         thr = 50; %threshold for coefficient absolute value
 
