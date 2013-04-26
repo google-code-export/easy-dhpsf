@@ -92,8 +92,10 @@ s.nmPerPixel = 125.78; % 8A% 160; %8B
 % channel identifier
 s.channel = '0';
 % [minWidth maxWidth] of the two spots of the DHPSF, units of pixels
-% relative to the original value of 160 nm / pix
-s.sigmaBounds = [1.0 1.5]*160/s.nmPerPixel;
+% *** NOTE: sigmaBounds is set to a constant value based upon DH microscope
+% implementation in Moerner lab. Other implementations may need to use different
+% values. ****
+s.sigmaBounds = [1.0 1.5];
 % [minSpacing maxSpacing] between the two spots of the DHPSF, units of
 % pixels relative to the original value of 160 nm / pix
 s.lobeDistBounds = [3.5 7]*160/s.nmPerPixel;   %[3.5 10]*160/s.nmPerPixel;
