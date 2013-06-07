@@ -401,8 +401,8 @@ for a=1:size(sifLogData,1)-2
                || fitParam(4)>max(yIdx(:)) || fitParam(6)>max(yIdx(:))
                 PSFfits(n,rowIdx,13) = -1002;   %% this flag will never show up because it is equivalent to extiflag -2 in lsqnonlin
             end
-            if fitParam(7)<=sigmaBounds(1) || fitParam(8)<=sigmaBounds(1) ...
-                || fitParam(7)>=sigmaBounds(2) || fitParam(8)>=sigmaBounds(2)
+            if fitParam(7)<sigmaBounds(1) || fitParam(8)<sigmaBounds(1) ...
+                || fitParam(7)>sigmaBounds(2) || fitParam(8)>sigmaBounds(2)
                 PSFfits(n,rowIdx,13) = -1003;   
             end
             if simgaRatio > sigmaRatioLimit;

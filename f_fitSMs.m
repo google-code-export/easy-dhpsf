@@ -454,8 +454,8 @@ for stack = 1:length(dataFile)
                     PSFfits(b,11) = -1002;
                 end
                 % absolute sigma size for either lobe within bounds?
-                if fitParam(7)<=sigmaBounds(1) || fitParam(8)<=sigmaBounds(1) ...
-                        || fitParam(7)>=sigmaBounds(2) || fitParam(8)>=sigmaBounds(2)
+                if fitParam(7)<sigmaBounds(1) || fitParam(8)<sigmaBounds(1) ...
+                        || fitParam(7)>sigmaBounds(2) || fitParam(8)>sigmaBounds(2)
                     PSFfits(b,11) = -1003;
                 end
                 % sigma ratio of lobes less than limit?

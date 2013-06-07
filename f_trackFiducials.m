@@ -617,8 +617,8 @@ for stack = 1:length(dataFile)
                             || fitParam(4)>max(yIdx(:)) || fitParam(6)>max(yIdx(:))
                         PSFfits(rowIdx,13) = -1002;
                     end
-                    if fitParam(7)<=sigmaBounds(1) || fitParam(8)<=sigmaBounds(1) ...
-                            || fitParam(7)>=sigmaBounds(2) || fitParam(8)>=sigmaBounds(2)
+                    if fitParam(7)<sigmaBounds(1) || fitParam(8)<sigmaBounds(1) ...
+                            || fitParam(7)>sigmaBounds(2) || fitParam(8)>sigmaBounds(2)
                         PSFfits(rowIdx,13) = -1003;
                     end
                     if simgaRatio > sigmaRatioLimit;
