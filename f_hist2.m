@@ -185,12 +185,12 @@ title(['Histogram of median z-position: ' num2str(length(zLoc)) ' localizations'
 xlabel('x (\mum)');
 ylabel('y (\mum)');
 
-% figure('Position',[(scrsz(3)-1280)/2+1 (scrsz(4)-720)/2 1280 720],'color','w');
-% set(gcf,'DefaultTextFontSize',12,'DefaultAxesFontSize',12);
-% imagesc(xEdges,yEdges,brightHist);axis image; colormap hot; colorbar;
-% title(['Localization density: ' num2str(length(zLoc)) ' localizations'])
-% xlabel('x (\mum)');
-% ylabel('y (\mum)');
+figure('Position',[(scrsz(3)-1280)/2+1 (scrsz(4)-720)/2 1280 720],'color','w');
+set(gcf,'DefaultTextFontSize',12,'DefaultAxesFontSize',12);
+imagesc(xEdges,yEdges,brightHist);axis image; colormap hot; colorbar;
+title(['Localization density: ' num2str(length(zLoc)) ' localizations'])
+xlabel('x (\mum)');
+ylabel('y (\mum)');
 
 figure('Position',[(scrsz(3)-1280)/2+1 (scrsz(4)-720)/2 1280 720],'color','w');
 % set(gcf,'DefaultTextFontSize',12,'DefaultAxesFontSize',12);

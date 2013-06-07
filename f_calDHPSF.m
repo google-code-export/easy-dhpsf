@@ -155,7 +155,7 @@ close(hROI);
 
 %% Ask user for bead location(s)   
 
-hLocs=figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
+hLocs=figure('Position',[(scrsz(3)-1280)/2+1 (scrsz(4)-720)/2 1280 720],'color','w');
 imagesc(dataAvg(ROI(2):ROI(2)+ROI(4)-1, ...
     ROI(1):ROI(1)+ROI(3)-1));axis image;colorbar;colormap hot; 
 title('Use LMB to select fiducials. Hit enter to stop or use RMB to select the final fiducial.');
@@ -181,7 +181,7 @@ hold off;
 % moleLocs = round(ginput);
 numBeads = size(moleLocs,1);
     
-saveas(hLocs,[outputFilePrefix 'bead map.png']);
+print(hLocs,'-dpng',[outputFilePrefix 'bead map.png']);
 close(hLocs);
 
 
@@ -250,11 +250,10 @@ for i=1:numSteps
 end
 
 
-%% Create output file directories
-
-outputFilePrefix = [dataFile(1:length(dataFile)-4) '\calibration ' ...
-    datestr(now,'yyyymmdd HHMM') '\'];
-mkdir(outputFilePrefix);
+% Create output file directories - *already created above*
+% outputFilePrefix = [dataFile(1:length(dataFile)-4) '\calibration ' ...
+%     datestr(now,'yyyymmdd HHMM') '\'];
+% mkdir(outputFilePrefix);
 
 
 %% Fit chosen beads throughout entire image stack
