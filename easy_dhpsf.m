@@ -86,9 +86,9 @@ s.smacmRawROI = [0 0 0 0];
 % EM gain setting used when acquiring SMACM data
 s.smacmEMGain = 300;
 % photons/count, camera setting, global to all modules
-s.conversionGain = 26.93; %8A % 24.7; % 8B
+s.conversionGain = 11.02; %8A % 24.7; % 8B
 % imaging system property, global to all modules
-s.nmPerPixel = 125.78; % 8A% 160; %8B
+s.nmPerPixel = 160; % 8A% 160; %8B
 % channel identifier
 s.channel = '0';
 % [minWidth maxWidth] of the two spots of the DHPSF, units of pixels
@@ -98,7 +98,7 @@ s.channel = '0';
 s.sigmaBounds = [1.0 1.5];
 % [minSpacing maxSpacing] between the two spots of the DHPSF, units of
 % pixels relative to the original value of 160 nm / pix
-s.lobeDistBounds = [3.5 7]*160/s.nmPerPixel;   %[3.5 10]*160/s.nmPerPixel;
+s.lobeDistBounds = [3.5 10]*160/s.nmPerPixel;   %[3.5 10]*160/s.nmPerPixel;
 % half-width of box to extract when fitting DHPSF images, units of integer pixels
 s.boxRadius = round(7*160/s.nmPerPixel);
 % smoothing filter width for identifying DHPSF SMs, units of pixels
@@ -240,8 +240,11 @@ haxesThreshImg = axes('parent',hpanelThresh,'position',[panelMargin*2+buttonWidt
 hbuttonFitRun = uicontrol('Parent',hpanelFit,'Style','pushbutton',...
     'String','Run','Position',[panelMargin,panelMargin,buttonWidth,25],...
     'Callback',{@buttonFitRun_Callback});
+hbuttonFitFilter = uicontrol('Parent',hpanelFit,'Style','pushbutton',...
+    'String','Apply filter','Position',[panelMargin*2+buttonWidth,panelMargin,buttonWidth,25],...
+    'Callback',{@buttonFitFilter_Callback});
 hbuttonFitDebug = uicontrol('Parent',hpanelFit,'Style','pushbutton',...
-    'String','Debug','Position',[panelMargin*2+buttonWidth,panelMargin,buttonWidth,25],...
+    'String','Debug','Position',[panelMargin*3+buttonWidth*2,panelMargin,buttonWidth,25],...
     'Callback',{@buttonFitDebug_Callback});
 % data output controls
 hbuttonOutExport = uicontrol('Parent',hpanelOut,'Style','pushbutton',...
@@ -263,8 +266,8 @@ newProj;
 set([hfig,htextProjStatus,...
     hpanelSetup,hpanelCal,hpanelFid,hpanelThresh,hpanelFit,hpanelOut,...
     htextCalStatus,htextFidStatus,htextThreshStatus,htextFitStatus,...
-    hbuttonCalRun,hbuttonFidRun,hbuttonThreshRun,hbuttonFitRun,hbuttonFitDebug...
-    hbuttonOutExport,hbuttonOutScatter,hbuttonOutHist,...
+    hbuttonCalRun,hbuttonFidRun,hbuttonThreshRun,hbuttonFitRun,hbuttonFitFilter,...
+    hbuttonFitDebug,hbuttonOutExport,hbuttonOutScatter,hbuttonOutHist,...
     htextSetupConv,heditSetupConv,... %     htextSetupChannel,hpopupSetupChannel,...
     htextSetupPixSize, heditSetupPixSize,htextCalSel,hpopupCalSel,...
     haxesCalImg,hcheckFidUse,...
@@ -414,12 +417,14 @@ set(hfig,'Visible','on');
             set(hbuttonOutScatter,'Enable','on');
             set(hbuttonOutHist,'Enable','on');
             set(hbuttonFitDebug,'Enable','on');
+            set(hbuttonFitFilter,'Enable','on');
         else
             set(htextFitStatus,'String','Incomplete','BackgroundColor','y');
             set(hbuttonOutExport,'Enable','off');
             set(hbuttonOutScatter,'Enable','off');
             set(hbuttonOutHist,'Enable','off');
             set(hbuttonFitDebug,'Enable','off');
+            set(hbuttonFitFilter,'Enable','off');
         end
         if s.projStatus(5)
             set(htextProjStatus,'String',projFile,...
@@ -559,6 +564,11 @@ set(hfig,'Visible','on');
         
         s.projStatus(4) = true;
         s.projStatus(5) = false;
+        updateGUI;
+    end
+    function buttonFitFilter_Callback(~,~)
+        s.lobeDistBounds = f_filterMoleculeFits(s.fitFilePrefix,...
+            s.lobeDistBounds,s.conversionGain,s.smacmEMGain);
         updateGUI;
     end
     function buttonFitDebug_Callback(~,~) 
