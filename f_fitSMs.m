@@ -27,7 +27,7 @@
 
 function [outputFilePrefix] = ...
     f_fitSMs(dataFile,dataPath,calFile,calBeadIdx,templateFile,templateFrames,peakThreshold,...
-    darkFile,logFile,logPath,boxRadius,channel, sigmaBounds,gaussianFilterSigma,minDistBetweenSMs,...
+    darkFile,logFile,logPath,boxRadius,channel,isVerticalInFocus,sigmaBounds,gaussianFilterSigma,minDistBetweenSMs,...
     lobeDistBounds,conversionGain,nmPerPixel,EMGain,templateLocs,ROI)
 % f_fitSMs is a module in easy_dhpsf that finds the positions of likely 
 % DH-PSF profiles by matching to a series of templates generated in 
@@ -401,14 +401,18 @@ for stack = 1:length(dataFile)
             y1 = fitParam(4);
             y2 = fitParam(6);
             % swap if y1>y2
-            if (y1 > y2)
+            if (y1 > y2 && isVerticalInFocus) || (x1 > x2 && ~isVerticalInFocus)
                 tx = x1; ty = y1;
                 x1 = x2; y1 = y2;
                 x2 = tx; y2 = ty;
                 clear tx ty;
             end
             %Finds the angle
-            PSFfits(b,14) = atan2(-(x2-x1),y2-y1) * 180/pi;
+            if isVerticalInFocus
+                PSFfits(b,14) = atan2(-(x2-x1),y2-y1) * 180/pi;
+            else
+                PSFfits(b,14) = atan2(-(y2-y1),x2-x1) * 180/pi;
+            end
             clear x1 x2 y1 y2;
             
             %Below is a way to count the photons. It integrates the box and

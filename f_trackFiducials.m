@@ -27,7 +27,7 @@
 
 function [outputFilePrefix] = f_trackFiducials(dataFile,dataPath,calFile,calBeadIdx,templateFile,templateFrames,...
                      darkFile,logFile,logPath,boxRadius,channel, gaussianFilterSigma,minDistBetweenSMs,...
-                     lobeDistBounds,conversionGain,nmPerPixel,EMGain,templateLocs,sigmaBounds)
+                     lobeDistBounds,conversionGain,nmPerPixel,EMGain,templateLocs,isVerticalInFocus,sigmaBounds)
 % f_trackFiducials is a module in easy_dhpsf that extracts the position of
 % one or more fiducial beads in an image stack. This position is then used 
 % to correct the fit localizations from that image stack.
@@ -568,14 +568,18 @@ for stack = 1:length(dataFile)
                 y1 = fitParam(4);
                 y2 = fitParam(6);
                 % swap if y1>y2
-                if (y1 > y2)
+                if (y1 > y2 && isVerticalInFocus) || (x1 > x2 && ~isVerticalInFocus)
                     tx = x1; ty = y1;
                     x1 = x2; y1 = y2;
                     x2 = tx; y2 = ty;
                     clear tx ty;
                 end
                 %Finds the angle
-                PSFfits(rowIdx,16) = atan2(-(x2-x1),y2-y1) * 180/pi;
+                if isVerticalInFocus
+                    PSFfits(rowIdx,16) = atan2(-(x2-x1),y2-y1) * 180/pi;
+                else
+                    PSFfits(rowIdx,16) = atan2(-(y2-y1),x2-x1) * 180/pi;
+                end
                 clear x1 x2 y1 y2;
                 
                 %Below is a way to count the photons. It integrates the box and

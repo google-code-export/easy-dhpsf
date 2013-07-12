@@ -26,7 +26,7 @@
 % SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 function [outputFilePrefix, numBeads] = ...
-    f_calDHPSF(conversionGain,nmPerPixel,boxRadius,channel,sigmaBounds,lobeDistBounds)
+    f_calDHPSF(conversionGain,nmPerPixel,boxRadius,channel,isVerticalInFocus,sigmaBounds,lobeDistBounds)
 % f_calDHPSF is a module in easy_dhpsf that calibrates the z vs. angle
 % response of the DH-PSF using one or more discrete fluorescent particles,
 % usually fluorescent beads. To generate the data, an objective stepper
@@ -347,17 +347,18 @@ for a=1:size(sifLogData,1)-2
         x2 = fitParam(5);
         y1 = fitParam(4);
         y2 = fitParam(6);
-        % swap if x1>x2
-%        if (x1 > x2) 
-        if (y1 > y2) 
+        if (y1 > y2 && isVerticalInFocus) || (x1 > x2 && ~isVerticalInFocus)
             tx = x1; ty = y1;
             x1 = x2; y1 = y2;
             x2 = tx; y2 = ty;
             clear tx ty;
         end
         %Finds the angle
-        PSFfits(n,rowIdx,16) = atan2(-(x2-x1),y2-y1) * 180/pi;
-%        PSFfits(rowIdx,16) = atan2(-(y2-y1),x2-x1) * 180/pi;
+        if isVerticalInFocus
+            PSFfits(n,rowIdx,16) = atan2(-(x2-x1),y2-y1) * 180/pi;
+        else
+            PSFfits(n,rowIdx,16) = atan2(-(y2-y1),x2-x1) * 180/pi;
+        end
         clear x1 x2 y1 y2;
 
         %Below is a way to count the photons. It integrates the box and
