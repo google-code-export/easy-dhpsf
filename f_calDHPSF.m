@@ -450,6 +450,35 @@ for a=1:size(sifLogData,1)-2
     drawnow;
 end
 
+%% fix fits with lobe definitions that are flipped
+if isVerticalInFocus
+    % if DH-PSF is vertical, y1 should be less than y2
+    fitsToFix = PSFfits(n,:,6) > PSFfits(n,:,8);
+else
+    % if DH-PSF is horizontal, x1 should be less than x2
+    fitsToFix = PSFfits(n,:,5) > PSFfits(n,:,7);
+end
+
+% flip lobe amplitudes
+temp = PSFfits(n,fitsToFix,3);
+PSFfits(n,fitsToFix,3) = PSFfits(n,fitsToFix,4);
+PSFfits(n,fitsToFix,4) = temp;
+
+% flip lobe positions
+temp = PSFfits(n,fitsToFix,5:6);
+PSFfits(n,fitsToFix,5:6) = PSFfits(n,fitsToFix,7:8);
+PSFfits(n,fitsToFix,7:8) = temp;
+
+% flip lobe sigmas
+temp = PSFfits(n,fitsToFix,9);
+PSFfits(n,fitsToFix,9) = PSFfits(n,fitsToFix,10);
+PSFfits(n,fitsToFix,10) = temp;
+
+% recalculate lobe amplitude ratio
+ampRatio = (PSFfits(n,:,3) - PSFfits(n,:,4))./sum(PSFfits(n,:,3:4),3);
+PSFfits(n,:,20) = ampRatio;
+
+%% we're done fitting now
 elapsedTime = toc(startTime);
 clear data residual dataAvg reconstructImg xIdx yIdx temp;
 close(h);
@@ -744,7 +773,7 @@ for n = 1:numFiles
         ampRatio = stepFitParam(:,20);
         sigmaRatio = stepFitParam(:,21);
 
-        goodFit = stepFitParam(:,13)>0;
+        goodFit = stepFitParam(:,13)>0 & sign(amp1)==sign(amp2);
 
         meanX(n, bead,step) = mean(x(goodFit));
         stdX(n,bead,step) = std(x(goodFit));
@@ -771,6 +800,7 @@ for n = 1:numFiles
         meanSigmaRatio(n,bead,step) = mean(sigmaRatio(goodFit));
         stdSigmaRatio(n,bead,step) = std(sigmaRatio(goodFit));       
 
+%         assert(stdAmpRatio(n,bead,step) <= 0.05);
     end
 
     %unwrap angles if we have greater than 180 degree range; need to convert
@@ -992,7 +1022,8 @@ for n = 1:numFiles
     %% write calibration parameters to a file
     save([outputFilePrefix 'calibration.mat'], ...
         'meanAngles', 'meanX', 'meanY', 'z', 'goodFit_forward', 'goodFit_backward', ...
-        'meanPhotons', 'stddevPhotons');
+        'meanPhotons', 'stddevPhotons', 'meanAmpRatio', 'stdAmpRatio', ...
+        'meanInterlobeDistance', 'stdInterlobeDistance');
 
 %     bead
     end
