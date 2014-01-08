@@ -153,16 +153,16 @@ for stack = 1:length(dataFile)
     
     %% create output log filenames
     if channel == '0'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\threshold ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep  'threshold ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     elseif channel == 'G'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\reflected\threshold ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'reflected' filesep 'threshold ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     elseif channel == 'R'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\transmitted\threshold ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'transmitted' filesep 'threshold ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     end
     

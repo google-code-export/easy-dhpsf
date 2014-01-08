@@ -97,23 +97,23 @@ for stack = 1:length(dataFile)
         
     end
     if channel == '0'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\fiduciaries ' ...
-        datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'fiduciaries ' ...
+        datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     
     elseif channel == 'G'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\reflected\fiduciaries ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'reflected' filesep 'fiduciaries ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
         
     elseif channel == 'R'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\transmitted\fiduciaries ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'transmitted' filesep 'fiduciaries ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     
     end
-    %     outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\fiduciaries ' ...
-%         datestr(now,'yyyymmdd HHMM') '\'];
+    %     outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'fiduciaries ' ...
+%         datestr(now,'yyyymmdd HHMM') filesep];
 %     mkdir(outputFilePrefix{stack});
     
     

@@ -98,12 +98,12 @@ imgHeight = dataFileInfo.Height;
 imgWidth = dataFileInfo.Width;
 
 if channel == '0'
-    outputFilePrefix = [dataFile(1:length(dataFile)-4) '\calibration ' ...
-        datestr(now,'yyyymmdd HHMM') '\'];
+    outputFilePrefix = [dataFile(1:length(dataFile)-4) filesep 'calibration ' ...
+        datestr(now,'yyyymmdd HHMM') filesep];
 
 else 
-    outputFilePrefix = [dataFile(1:length(dataFile)-4) '\' channel(1) ' calibration ' ...
-        datestr(now,'yyyymmdd HHMM') '\'];
+    outputFilePrefix = [dataFile(1:length(dataFile)-4) filesep  channel(1) ' calibration ' ...
+        datestr(now,'yyyymmdd HHMM') filesep];
 
 end
 
@@ -251,8 +251,8 @@ end
 
 
 % Create output file directories - *already created above*
-% outputFilePrefix = [dataFile(1:length(dataFile)-4) '\calibration ' ...
-%     datestr(now,'yyyymmdd HHMM') '\'];
+% outputFilePrefix = [dataFile(1:length(dataFile)-4) filesep 'calibration ' ...
+%     datestr(now,'yyyymmdd HHMM') filesep];
 % mkdir(outputFilePrefix);
 
 

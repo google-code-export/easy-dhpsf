@@ -81,16 +81,16 @@ for stack = 1:length(dataFile)
     
     %% create output log filenames
     if channel == '0'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\molecule fits  ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'molecule fits  ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     elseif channel == 'G'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\reflected\molecule fits  ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'reflected' filesep 'molecule fits  ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     elseif channel == 'R'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\transmitted\molecule fits ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'transmitted' filesep 'molecule fits ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     end
     
